@@ -20,9 +20,7 @@ export default {
 
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore();
-  if (to.name === "logout" && userStore.isAuthenticated()) {
-    const userStore = useUserStore();
-  }
+
   if (to.name === "loginCallback" && Object.keys(to.query).length) {
     const code = to.query.code;
     const accessToken = spotifyAPI.getAccessToken(code);
@@ -30,9 +28,23 @@ router.beforeEach((to, from, next) => {
     return next({ name: "about" });
   }
 
+  if (to.name === "logout" && !userStore.isAuthenticated()) {
+    userStore.logout();
+    next({ name: "login" });
+  }
+  
+  if (to.name === "login" && userStore.isAuthenticated()) {
+    next({ name: "about" });
+  }
+  
+  return next();
+    
+  /*
   !userStore.isAuthenticated() && to.name !== "login"
     ? next({ name: "login" })
-    : next();
+    : next({name:"about"});
+}
+    */
 });
 </script>
 
